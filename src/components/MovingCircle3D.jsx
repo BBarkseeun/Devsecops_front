@@ -20,31 +20,31 @@ function AnimatedSphere() {
 function BackgroundSpheres() {
   return (
     <>
-      {/* 어두운 보라색 구체 (왼쪽 위) */}
+      {/* 네온 그린 구체 (왼쪽 위) */}
       <Float speed={2}>
         <Sphere position={[-4, 2, -2]} args={[0.8, 32, 32]}>
-          <MeshDistortMaterial color="#1a0b2e" distort={0.2} speed={1.8} />
+          <MeshDistortMaterial color="#00ff88" distort={0.2} speed={1.8} />
         </Sphere>
       </Float>
       
-      {/* 깊은 검은 보라색 구체 (오른쪽 아래) */}
+      {/* 진한 초록 구체 (오른쪽 아래) */}
       <Float speed={1.8}>
         <Sphere position={[3, -1, -1]} args={[0.6, 32, 32]}>
-          <MeshDistortMaterial color="#0f0419" distort={0.25} speed={1.2} />
+          <MeshDistortMaterial color="#0d5f3c" distort={0.25} speed={1.2} />
         </Sphere>
       </Float>
       
-      {/* 중간 톤 보라-검정 구체 (오른쪽 위) */}
+      {/* 밝은 초록 구체 (오른쪽 위) */}
       <Float speed={1.2}>
         <Sphere position={[2, 3, -3]} args={[0.7, 32, 32]}>
-          <MeshDistortMaterial color="#3b1a5e" distort={0.15} speed={2.0} />
+          <MeshDistortMaterial color="#22c55e" distort={0.15} speed={2.0} />
         </Sphere>
       </Float>
       
-      {/* 진한 보라-검정 구체 (왼쪽 아래) */}
+      {/* 어두운 초록 구체 (왼쪽 아래) */}
       <Float speed={1.6}>
         <Sphere position={[-2, -2, -2]} args={[0.5, 32, 32]}>
-          <MeshDistortMaterial color="#240b3d" distort={0.3} speed={1.4} />
+          <MeshDistortMaterial color="#166534" distort={0.3} speed={1.4} />
         </Sphere>
       </Float>
     </>

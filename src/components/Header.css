@@ -6,8 +6,7 @@
   z-index: 1000;
   padding: 20px 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* 초기 상태에서는 블러 제거 - 완전히 투명 */
 }
 
 .header--scrolled {
@@ -15,7 +14,7 @@
   padding: 15px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px); /* 스크롤 시에만 블러 효과 */
   -webkit-backdrop-filter: blur(20px);
 }
 
@@ -28,11 +27,14 @@
 .header__logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   cursor: pointer;
   transition: transform 0.3s ease;
-  z-index: 10;
+  z-index: 20;
   position: relative;
+  background: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .header__logo:hover {
@@ -41,9 +43,12 @@
 
 .header__logo-icon {
   color: var(--primary-color);
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   animation: glow 2s ease-in-out infinite;
+  background: none !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 
 .header__logo-text {
@@ -66,8 +71,7 @@
   align-items: center;
   gap: 8px;
   text-shadow: none;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* 버튼도 초기에는 블러 없이 깔끔하게 */
 }
 
 /* Responsive design */

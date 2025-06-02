@@ -258,11 +258,6 @@
   z-index: 1;
 }
 
-.floating-element--1 {
-  top: 20%;
-  left: 10%;
-  animation-delay: 0s;
-}
 
 .floating-element--2 {
   top: 60%;
@@ -274,6 +269,42 @@
   bottom: 30%;
   left: 20%;
   animation-delay: 4s;
+}
+
+.floating-element--4 {
+  top: 40%;
+  right: 25%;
+  animation-delay: 1s;
+  color: green;
+}
+
+.floating-element--5 {
+  top: 68%;
+  left: 60%;
+  animation-delay: 3s;
+  color: var(--accent-color);
+}
+
+.floating-element--6 {
+  top: 10%;
+  right: 22%;
+  animation-delay: 1.5s;
+  opacity: 0.45;
+}
+
+.floating-element--7 {
+  bottom: 60%;
+  left: 80%;
+  animation-delay: 2.7s;
+  opacity: 0.5;
+}
+
+.floating-element--8 {
+  top:40%;
+  left: 20%;
+  animation-delay: 3.5s;
+  opacity: 0.6;
+  filter: drop-shadow(0 0 16px #ff6b6b88);
 }
 
 /* Scroll indicator */

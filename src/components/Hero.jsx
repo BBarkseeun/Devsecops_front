@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Play, ArrowRight, Shield, Zap, Brain } from 'lucide-react'
+import { Play, ArrowRight, Shield, Zap, Brain, ShieldCheck, Lock, Fingerprint, Scan, Radar, KeyRound, ShieldAlert } from 'lucide-react'
 import MovingCircle3D from './MovingCircle3D'
 import './Hero.css'
 
@@ -126,10 +126,28 @@ const Hero = ({ onStartAnalysis }) => {
           <Shield size={32} />
         </div>
         <div className="floating-element floating-element--2">
-          <Brain size={28} />
+          <ShieldCheck size={28} />
         </div>
         <div className="floating-element floating-element--3">
-          <Zap size={24} />
+          <Lock size={24} />
+        </div>
+        <div className="floating-element floating-element--4">
+          <Fingerprint size={26} />
+        </div>
+        <div className="floating-element floating-element--5">
+          <Scan size={30} />
+        </div>
+        {/* 초록색 레이더 */}
+        <div className="floating-element floating-element--6" style={{color: '#00ff88'}}>
+          <Radar size={32} />
+        </div>
+        {/* 노란색 열쇠 */}
+        <div className="floating-element floating-element--7" style={{color: '#facc15'}}>
+          <KeyRound size={28} />
+        </div>
+        {/* 빨간 경고 방패 */}
+        <div className="floating-element floating-element--8" style={{color: '#ff6b6b'}}>
+          <ShieldAlert size={36} />
         </div>
       </div>
 
