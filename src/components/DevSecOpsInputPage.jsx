@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Shield, Server, GitBranch, Key, Eye, EyeOff, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
 import axios from 'axios'
 import './DevSecOpsInputPage.css'
+import GitLabRepositoryPage from './GitLabRepositoryPage'
 
 const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
   const [formData, setFormData] = useState({
@@ -21,6 +22,8 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [showGitLabRepositories, setShowGitLabRepositories] = useState(false)
+  const [projects, setProjects] = useState([])
   
   const containerRef = useRef(null)
   const floatingElementsRef = useRef([])
@@ -115,14 +118,22 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
       // Store access key in localStorage for future use
       localStorage.setItem('access_key', formData.access_key)
       
-      // Call the parent component's callback with the projects data
-      onStartAnalysis(res.data)
+      // Set projects and show GitLab repository page
+      setProjects(res.data)
+      setShowGitLabRepositories(true)
     } catch (err) {
       console.error('Error:', err); // 디버깅을 위한 로그
       setError("세션 초기화 실패: " + (err.response?.data?.error || err.message))
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleRepositorySelect = (repository) => {
+    // Handle repository selection
+    console.log('Selected repository:', repository)
+    // 저장소 선택 후 바로 분석 시작
+    onStartAnalysis(repository)
   }
 
   const formFields = [
@@ -162,172 +173,182 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
 
   return (
     <div className="devsecops-input-page" ref={containerRef}>
-      {/* Animated Background */}
-      <div className="input-page-bg">
-        <div className="bg-gradient"></div>
-        <div className="grid-pattern"></div>
-        <div className="floating-particles">
-          {Array.from({ length: 50 }, (_, i) => (
-            <div key={i} className={`particle particle-${i % 3}`}></div>
-          ))}
-        </div>
-      </div>
-
-      {/* Floating Interactive Elements */}
-      <div className="floating-shapes">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div
-            key={i}
-            ref={el => floatingElementsRef.current[i] = el}
-            className={`floating-shape shape-${i + 1}`}
-          >
-            {i % 4 === 0 && <Shield size={20} />}
-            {i % 4 === 1 && <Server size={18} />}
-            {i % 4 === 2 && <GitBranch size={16} />}
-            {i % 4 === 3 && <Zap size={22} />}
+      {!showGitLabRepositories ? (
+        <>
+          {/* Animated Background */}
+          <div className="input-page-bg">
+            <div className="bg-gradient"></div>
+            <div className="grid-pattern"></div>
+            <div className="floating-particles">
+              {Array.from({ length: 50 }, (_, i) => (
+                <div key={i} className={`particle particle-${i % 3}`}></div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
 
-      {/* Header */}
-      <header className="input-page-header">
-        <button className="back-btn" onClick={onBackToSelection}>
-          <ArrowLeft size={20} />
-          Back to Selection
-        </button>
-        
-        <div className="header-title">
-          <div className="title-icon">
-            <GitBranch size={32} />
-          </div>
-          <div>
-            <h1>DevSecOps Pipeline Analysis</h1>
-            <p>Configure your security diagnostic parameters</p>
-          </div>
-        </div>
-
-        <div className="progress-indicator">
-          <div className="progress-steps">
-            {formFields.map((_, index) => (
-              <div 
-                key={index}
-                className={`step ${index <= currentStep ? 'active' : ''} ${
-                  formData[formFields[index].key] && !validationErrors[formFields[index].key] ? 'completed' : ''
-                }`}
-              />
+          {/* Floating Interactive Elements */}
+          <div className="floating-shapes">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div
+                key={i}
+                ref={el => floatingElementsRef.current[i] = el}
+                className={`floating-shape shape-${i + 1}`}
+              >
+                {i % 4 === 0 && <Shield size={20} />}
+                {i % 4 === 1 && <Server size={18} />}
+                {i % 4 === 2 && <GitBranch size={16} />}
+                {i % 4 === 3 && <Zap size={22} />}
+              </div>
             ))}
           </div>
-        </div>
-      </header>
 
-      {error && (
-        <div className="error-banner">
-          <AlertCircle size={20} />
-          <span>{error}</span>
-        </div>
-      )}
+          {/* Header */}
+          <header className="input-page-header">
+            <button className="back-btn" onClick={onBackToSelection}>
+              <ArrowLeft size={20} />
+              Back to Selection
+            </button>
+            
+            <div className="header-title">
+              <div className="title-icon">
+                <GitBranch size={32} />
+              </div>
+              <div>
+                <h1>DevSecOps Pipeline Analysis</h1>
+                <p>Configure your security diagnostic parameters</p>
+              </div>
+            </div>
 
-      {/* Main Content */}
-      <main className="input-page-content">
-        <div className="form-container">
-          <div className="form-intro">
-            <h2>Secure Configuration Setup</h2>
-            <p>Enter your credentials and configuration details for comprehensive DevSecOps security analysis</p>
-          </div>
+            <div className="progress-indicator">
+              <div className="progress-steps">
+                {formFields.map((_, index) => (
+                  <div 
+                    key={index}
+                    className={`step ${index <= currentStep ? 'active' : ''} ${
+                      formData[formFields[index].key] && !validationErrors[formFields[index].key] ? 'completed' : ''
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </header>
 
-          <form onSubmit={handleSubmit} className="input-form">
-            <div className="form-grid">
-              {formFields.map((field, index) => {
-                const Icon = field.icon
-                const hasError = validationErrors[field.key]
-                const isValid = formData[field.key] && !hasError
-                const isSecret = field.type === 'password'
+          {error && (
+            <div className="error-banner">
+              <AlertCircle size={20} />
+              <span>{error}</span>
+            </div>
+          )}
 
-                return (
-                  <div key={field.key} className="input-group">
-                    <label className="input-label">
-                      <div className="label-content">
-                        <Icon size={20} className="label-icon" />
-                        <span>{field.label}</span>
-                        {isValid && <CheckCircle2 size={16} className="valid-icon" />}
-                        {hasError && <AlertCircle size={16} className="error-icon" />}
+          {/* Main Content */}
+          <main className="input-page-content">
+            <div className="form-container">
+              <div className="form-intro">
+                <h2>Secure Configuration Setup</h2>
+                <p>Enter your credentials and configuration details for comprehensive DevSecOps security analysis</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="input-form">
+                <div className="form-grid">
+                  {formFields.map((field, index) => {
+                    const Icon = field.icon
+                    const hasError = validationErrors[field.key]
+                    const isValid = formData[field.key] && !hasError
+                    const isSecret = field.type === 'password'
+
+                    return (
+                      <div key={field.key} className="input-group">
+                        <label className="input-label">
+                          <div className="label-content">
+                            <Icon size={20} className="label-icon" />
+                            <span>{field.label}</span>
+                            {isValid && <CheckCircle2 size={16} className="valid-icon" />}
+                            {hasError && <AlertCircle size={16} className="error-icon" />}
+                          </div>
+                          <span className="input-description">{field.description}</span>
+                        </label>
+                        
+                        <div className="input-wrapper">
+                          <input
+                            type={isSecret && !showSecrets[field.key] ? 'password' : 'text'}
+                            value={formData[field.key]}
+                            onChange={(e) => handleInputChange(field.key, e.target.value)}
+                            placeholder={field.placeholder}
+                            className={`form-input ${hasError ? 'error' : ''} ${isValid ? 'valid' : ''}`}
+                            onFocus={() => setCurrentStep(index)}
+                          />
+                          
+                          {isSecret && (
+                            <button
+                              type="button"
+                              className="visibility-toggle"
+                              onClick={() => toggleSecretVisibility(field.key)}
+                            >
+                              {showSecrets[field.key] ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                          )}
+                          
+                          <div className="input-glow"></div>
+                        </div>
+                        
+                        {hasError && (
+                          <div className="error-message">
+                            {validationErrors[field.key]}
+                          </div>
+                        )}
                       </div>
-                      <span className="input-description">{field.description}</span>
-                    </label>
-                    
-                    <div className="input-wrapper">
-                      <input
-                        type={isSecret && !showSecrets[field.key] ? 'password' : 'text'}
-                        value={formData[field.key]}
-                        onChange={(e) => handleInputChange(field.key, e.target.value)}
-                        placeholder={field.placeholder}
-                        className={`form-input ${hasError ? 'error' : ''} ${isValid ? 'valid' : ''}`}
-                        onFocus={() => setCurrentStep(index)}
-                      />
-                      
-                      {isSecret && (
-                        <button
-                          type="button"
-                          className="visibility-toggle"
-                          onClick={() => toggleSecretVisibility(field.key)}
-                        >
-                          {showSecrets[field.key] ? <EyeOff size={18} /> : <Eye size={18} />}
-                        </button>
-                      )}
-                      
-                      <div className="input-glow"></div>
-                    </div>
-                    
-                    {hasError && (
-                      <div className="error-message">
-                        {validationErrors[field.key]}
-                      </div>
-                    )}
+                    )
+                  })}
+                </div>
+
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="submit-btn"
+                    disabled={!isFormValid || isSubmitting}
+                  >
+                    {isSubmitting ? 'Initializing...' : 'Start Analysis'}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Side Info Panel */}
+            <div className="info-panel">
+              <h3>What We'll Analyze</h3>
+              <div className="analysis-items">
+                <div className="analysis-item">
+                  <Shield className="item-icon" />
+                  <div>
+                    <h4>IAM Policy Analysis</h4>
+                    <p>Review permissions and access controls</p>
                   </div>
-                )
-              })}
-            </div>
-
-            <div className="form-actions">
-              <button
-                type="submit"
-                className="submit-btn"
-                disabled={!isFormValid || isSubmitting}
-              >
-                {isSubmitting ? 'Initializing...' : 'Start Analysis'}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Side Info Panel */}
-        <div className="info-panel">
-          <h3>What We'll Analyze</h3>
-          <div className="analysis-items">
-            <div className="analysis-item">
-              <Shield className="item-icon" />
-              <div>
-                <h4>IAM Policy Analysis</h4>
-                <p>Review permissions and access controls</p>
+                </div>
+                <div className="analysis-item">
+                  <Server className="item-icon" />
+                  <div>
+                    <h4>EC2 Security Assessment</h4>
+                    <p>Evaluate instance configuration and vulnerabilities</p>
+                  </div>
+                </div>
+                <div className="analysis-item">
+                  <GitBranch className="item-icon" />
+                  <div>
+                    <h4>Code Repository Scan</h4>
+                    <p>Detect security issues in your codebase</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="analysis-item">
-              <Server className="item-icon" />
-              <div>
-                <h4>EC2 Security Assessment</h4>
-                <p>Evaluate instance configuration and vulnerabilities</p>
-              </div>
-            </div>
-            <div className="analysis-item">
-              <GitBranch className="item-icon" />
-              <div>
-                <h4>Code Repository Scan</h4>
-                <p>Detect security issues in your codebase</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+          </main>
+        </>
+      ) : (
+        <GitLabRepositoryPage
+          onBackToInput={() => setShowGitLabRepositories(false)}
+          onSelectRepository={handleRepositorySelect}
+          projects={projects}
+        />
+      )}
     </div>
   )
 }
