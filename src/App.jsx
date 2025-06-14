@@ -14,10 +14,12 @@ import ThreeBackground from './components/ThreeBackground'
 import SelectionPage from './components/SelectionPage'
 import DevSecOpsInputPage from './components/DevSecOpsInputPage'
 import GitLabRepositoryPage from './components/GitLabRepositoryPage'
+import ScanLoadingPage from './ScanLoadingPage'
 
 function App() {
   const scrollRef = useRef(null)
   const locomotiveScrollRef = useRef(null)
+  const scanStartedRef = useRef(false)
   
   // URL 파라미터에서 페이지 상태 읽기
   const getInitialPage = () => {
@@ -28,6 +30,8 @@ function App() {
   
   const [currentPage, setCurrentPage] = useState(getInitialPage())
   const [projects, setProjects] = useState([])
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [scanResult, setScanResult] = useState(null)
 
   // URL 업데이트 함수
   const updateURL = (page) => {
@@ -93,16 +97,32 @@ function App() {
   }
 
   const handleStartDevSecOpsAnalysis = (projectsData) => {
-    console.log('Received projects data:', projectsData); // 디버깅을 위한 로그
+    console.log('Loading GitLab projects:', projectsData);
     setProjects(projectsData);
     setCurrentPage('gitlab-repos');
     updateURL('gitlab-repos');
-  }
+  };
 
   const handleBackToDevSecOpsInput = () => {
     setCurrentPage('devsecops')
     updateURL('devsecops')
   }
+
+  const handleStartScan = (project) => {
+    // 이미 스캔이 시작되었다면 중복 호출 방지
+    if (scanStartedRef.current) return;
+    scanStartedRef.current = true;
+
+    console.log('Starting security scan for project:', project);
+    setSelectedProject(project);
+    setCurrentPage('scan-loading');
+    updateURL('scan-loading');
+
+    // 스캔 페이지로 이동 후 ref 초기화 (다음 스캔을 위해)
+    setTimeout(() => {
+      scanStartedRef.current = false;
+    }, 1000);
+  };
 
   // GitLab 레포지토리 목록 페이지
   if (currentPage === 'gitlab-repos') {
@@ -110,6 +130,7 @@ function App() {
       <GitLabRepositoryPage 
         onBackToInput={handleBackToDevSecOpsInput}
         projects={projects}
+        onStartScan={handleStartScan}
       />
     )
   }
@@ -132,6 +153,112 @@ function App() {
         onSelectInfra={handleSelectInfra}
         onSelectDevSecOps={handleSelectDevSecOps}
       />
+    )
+  }
+
+  // 스캔 로딩 페이지
+  if (currentPage === 'scan-loading') {
+    return (
+      <ScanLoadingPage
+        project={selectedProject}
+        onComplete={(result) => {
+          if (result.status === 'success') {
+            setScanResult(result.data);
+            setCurrentPage('scan-result');
+          } else {
+            // 에러가 발생한 경우 에러 메시지를 스캔 결과에 저장
+            setScanResult({
+              error: true,
+              message: result.error || '스캔 중 오류가 발생했습니다.'
+            });
+            setCurrentPage('scan-result');
+          }
+        }}
+      />
+    )
+  }
+
+  // 스캔 결과 페이지
+  if (currentPage === 'scan-result') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#18122B',
+        color: '#fff',
+        padding: '40px'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          width: '100%',
+          margin: '0 auto'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '32px'
+          }}>
+            <h2 style={{
+              fontSize: '2rem',
+              background: 'linear-gradient(90deg,#7F55B1,#7E60BF)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent'
+            }}>
+              {scanResult?.error ? '스캔 오류' : '스캔 결과'}
+            </h2>
+            <button
+              onClick={() => {
+                setCurrentPage('gitlab-repos');
+                setScanResult(null);
+                setSelectedProject(null);
+              }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                color: '#fff',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              돌아가기
+            </button>
+          </div>
+
+          {scanResult?.error ? (
+            <div style={{
+              background: 'rgba(255, 87, 87, 0.1)',
+              border: '1px solid rgba(255, 87, 87, 0.3)',
+              padding: '24px',
+              borderRadius: '16px',
+              color: '#ff5757'
+            }}>
+              <p>{scanResult.message}</p>
+            </div>
+          ) : (
+            <div style={{
+              background: '#232946',
+              color: '#bdbddd',
+              padding: '24px',
+              borderRadius: '16px',
+              maxWidth: '900px',
+              width: '100%',
+              overflowX: 'auto',
+              fontSize: '1rem',
+              lineHeight: '1.6'
+            }}>
+              <pre style={{whiteSpace: 'pre-wrap'}}>{JSON.stringify(scanResult, null, 2)}</pre>
+            </div>
+          )}
+        </div>
+      </div>
     )
   }
 

@@ -98,43 +98,35 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!isFormValid) return
+    e.preventDefault();
+    if (!isFormValid) return;
 
-    setIsSubmitting(true)
-    setError(null)
+    setIsSubmitting(true);
+    setError(null);
 
     try {
       // Initialize session
-      await axios.post("http://localhost:5001/session", formData)
+      await axios.post("http://localhost:5001/session", formData);
       
       // Get projects list
       const res = await axios.post("http://localhost:5001/projects", {
         access_key: formData.access_key
-      })
+      });
       
-      console.log('Projects response:', res.data); // 디버깅을 위한 로그
+      console.log('Projects loaded successfully:', res.data);
       
       // Store access key in localStorage for future use
-      localStorage.setItem('access_key', formData.access_key)
+      localStorage.setItem('access_key', formData.access_key);
       
-      // Set projects and show GitLab repository page
-      setProjects(res.data)
-      setShowGitLabRepositories(true)
+      // Pass projects to App component and navigate to repository page
+      onStartAnalysis(res.data);
     } catch (err) {
-      console.error('Error:', err); // 디버깅을 위한 로그
-      setError("세션 초기화 실패: " + (err.response?.data?.error || err.message))
+      console.error('Error:', err);
+      setError("세션 초기화 실패: " + (err.response?.data?.error || err.message));
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
-
-  const handleRepositorySelect = (repository) => {
-    // Handle repository selection
-    console.log('Selected repository:', repository)
-    // 저장소 선택 후 바로 분석 시작
-    onStartAnalysis(repository)
-  }
+  };
 
   const formFields = [
     {
@@ -173,7 +165,13 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
 
   return (
     <div className="devsecops-input-page" ref={containerRef}>
-      {!showGitLabRepositories ? (
+      {showGitLabRepositories ? (
+        <GitLabRepositoryPage
+          onBackToInput={() => setShowGitLabRepositories(false)}
+          projects={projects}
+          onStartScan={onStartAnalysis}
+        />
+      ) : (
         <>
           {/* Animated Background */}
           <div className="input-page-bg">
@@ -342,12 +340,6 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
             </div>
           </main>
         </>
-      ) : (
-        <GitLabRepositoryPage
-          onBackToInput={() => setShowGitLabRepositories(false)}
-          onSelectRepository={handleRepositorySelect}
-          projects={projects}
-        />
       )}
     </div>
   )

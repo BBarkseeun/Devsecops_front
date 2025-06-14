@@ -9,12 +9,21 @@
   color: #ffffff;
   --mouse-x: 50%;
   --mouse-y: 50%;
-  --primary-color: #00ff88;
-  --secondary-color: #00d4ff;
-  --accent-color: #ff6b6b;
+  --primary-color: #7F55B1;
+  --secondary-color: #7E60BF;
+  --accent-color: #f49bab;
+  --gradient-primary: linear-gradient(90deg, #7F55B1 0%, #7E60BF 100%);
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
   --text-muted: rgba(255, 255, 255, 0.5);
+}
+
+.devsecops-input-page .title-section {
+  text-align: center;
+  padding: 120px 20px 60px;
+  position: relative;
+  z-index: 2;
+  margin-top: 80px;
 }
 
 /* Animated Background */
@@ -503,12 +512,12 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+  box-shadow: 0 10px 30px #7E60BF44;
 }
 
 .submit-btn:hover:not(.disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 15px 40px rgba(0, 255, 136, 0.4);
+  box-shadow: 0 15px 40px #38bdf866;
 }
 
 .submit-btn.disabled {

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, GitBranch, Star, Eye, Calendar, Search, Filter, Code, Lock, Globe, Users, AlertCircle } from 'lucide-react';
 import axios from 'axios';
 import './GitLabRepositoryPage.css';
 
-const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) => {
+const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects, onStartScan }) => {
   const [repositories, setRepositories] = useState([]);
   const [filteredRepos, setFilteredRepos] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -146,7 +146,7 @@ const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) =
   const languages = [...new Set(repositories.map(repo => repo.language))];
 
   const handleProjectSelect = async (repo) => {
-    if (isDownloading) return;
+    if (isDownloading || repo.id === selectedProject?.id) return;
     
     setIsDownloading(true);
     setError(null);
@@ -170,32 +170,16 @@ const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) =
     } catch (err) {
       console.error('Download error:', err);
       setError("CI 파일 다운로드 실패: " + (err.response?.data?.error || err.message));
-      setSelectedProject(repo);
     } finally {
-      console.log('Download process completed');
       setIsDownloading(false);
     }
   };
 
-  const handleScan = async () => {
-    if (!selectedProject) return;
-    
+  const handleStartScan = useCallback(() => {
+    if (!selectedProject || isScanning) return;
     setIsScanning(true);
-    setError(null);
-    try {
-      const access_key = localStorage.getItem('access_key');
-      const res = await axios.post("http://localhost:5001/projects/download-ci/scan", {
-        access_key: access_key,
-        project_id: selectedProject.id
-      });
-      setScanResult(res.data);
-      // onSelectRepository(selectedProject);
-    } catch (err) {
-      setError("스캔 실패: " + (err.response?.data?.error || err.message));
-    } finally {
-      setIsScanning(false);
-    }
-  };
+    onStartScan(selectedProject);
+  }, [selectedProject, isScanning, onStartScan]);
 
   return (
     <div className="gitlab-repository-page" ref={containerRef}>
@@ -373,8 +357,7 @@ const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) =
                     <div className="repo-glow"></div>
                   </div>
                   
-                  {/* Selected Project Actions */}
-                  {selectedProject?.id === repo.id && !isDownloading && (
+                  {selectedProject && selectedProject.id === repo.id && !isDownloading && (
                     <div className="project-actions">
                       <div className="action-header">
                         <h3>선택된 프로젝트: {selectedProject.name}</h3>
@@ -383,7 +366,7 @@ const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) =
                       <div className="action-buttons">
                         <button
                           className="scan-btn"
-                          onClick={handleScan}
+                          onClick={handleStartScan}
                           disabled={isScanning}
                         >
                           {isScanning ? '스캔 중...' : '보안 스캔 시작'}
@@ -392,8 +375,9 @@ const GitLabRepositoryPage = ({ onBackToInput, onSelectRepository, projects }) =
                           className="cancel-btn"
                           onClick={() => {
                             setSelectedProject(null);
-                            setScanResult(null);
+                            setIsScanning(false);
                           }}
+                          disabled={isScanning}
                         >
                           취소
                         </button>

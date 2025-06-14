@@ -9,9 +9,10 @@
   color: #ffffff;
   --mouse-x: 50%;
   --mouse-y: 50%;
-  --primary-color: #00ff88;
-  --secondary-color: #00d4ff;
-  --accent-color: #ff6b6b;
+  --primary-color: #7F55B1;
+  --secondary-color: #7E60BF;
+  --accent-color: #f49bab;
+  --gradient-primary: linear-gradient(90deg, #7F55B1 0%, #7E60BF 100%);
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.7);
   --text-muted: rgba(255, 255, 255, 0.5);

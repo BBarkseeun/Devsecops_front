@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { ArrowLeft, Server, GitBranch, Shield, Zap, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Server, GitBranch, Shield, Zap, ArrowRight, KeyRound } from 'lucide-react'
 import './SelectionPage.css'
 
 const SelectionPage = ({ onBackToHome, onSelectInfra, onSelectDevSecOps }) => {
@@ -77,7 +77,7 @@ const SelectionPage = ({ onBackToHome, onSelectInfra, onSelectDevSecOps }) => {
         <div className="selection-cards" ref={cardsRef}>
           {/* Infrastructure Analysis Card */}
           <div 
-            className="selection-card infra-card"
+            className="selection-card infra-card purple-card"
             onClick={onSelectInfra}
             onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}
             onMouseEnter={handleMouseEnter}
@@ -106,9 +106,37 @@ const SelectionPage = ({ onBackToHome, onSelectInfra, onSelectDevSecOps }) => {
             <div className="card-overlay"></div>
           </div>
 
+          {/* Least Privilege Audit Card */}
+          <div
+            className="selection-card minpriv-card pink-card"
+            onClick={() => alert('Least Privilege Audit feature coming soon!')}
+            onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="card-background"></div>
+            <div className="card-content">
+              <div className="card-icon">
+                <KeyRound size={48} />
+              </div>
+              <h2>Least Privilege Audit</h2>
+              <p>Audit IAM users and policies for least privilege compliance</p>
+              <ul className="card-features">
+                <li><Zap size={16} /> Check IAM user policies</li>
+                <li><Zap size={16} /> Detect unused policies (JSON)</li>
+                <li><Zap size={16} /> Recommend removal of unused IAM Users/Roles</li>
+              </ul>
+              <div className="card-cta">
+                <span>Start Least Privilege Audit</span>
+                <ArrowRight size={20} />
+              </div>
+            </div>
+            <div className="card-overlay"></div>
+          </div>
+
           {/* DevSecOps Pipeline Card */}
           <div 
-            className="selection-card devsecops-card"
+            className="selection-card devsecops-card peach-card"
             onClick={onSelectDevSecOps}
             onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}
             onMouseEnter={handleMouseEnter}
