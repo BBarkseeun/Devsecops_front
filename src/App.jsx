@@ -27,6 +27,7 @@ function App() {
   }
   
   const [currentPage, setCurrentPage] = useState(getInitialPage())
+  const [projects, setProjects] = useState([])
 
   // URL 업데이트 함수
   const updateURL = (page) => {
@@ -91,11 +92,11 @@ function App() {
     updateURL('devsecops')
   }
 
-  const handleStartDevSecOpsAnalysis = (formData) => {
-    console.log('DevSecOps 분석 시작:', formData)
-    // GitLab 레포지토리 목록 페이지로 이동
-    setCurrentPage('gitlab-repos')
-    updateURL('gitlab-repos')
+  const handleStartDevSecOpsAnalysis = (projectsData) => {
+    console.log('Received projects data:', projectsData); // 디버깅을 위한 로그
+    setProjects(projectsData);
+    setCurrentPage('gitlab-repos');
+    updateURL('gitlab-repos');
   }
 
   const handleBackToDevSecOpsInput = () => {
@@ -103,18 +104,12 @@ function App() {
     updateURL('devsecops')
   }
 
-  const handleSelectRepository = (repository) => {
-    console.log('선택된 레포지토리:', repository)
-    // TODO: 분석 시작 페이지로 이동
-    alert(`${repository.name} 레포지토리 분석을 시작합니다!`)
-  }
-
   // GitLab 레포지토리 목록 페이지
   if (currentPage === 'gitlab-repos') {
     return (
       <GitLabRepositoryPage 
         onBackToInput={handleBackToDevSecOpsInput}
-        onSelectRepository={handleSelectRepository}
+        projects={projects}
       />
     )
   }

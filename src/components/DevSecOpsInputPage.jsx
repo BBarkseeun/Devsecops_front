@@ -1,23 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ArrowLeft, Shield, Server, GitBranch, Key, Eye, EyeOff, CheckCircle2, AlertCircle, Zap } from 'lucide-react'
+import axios from 'axios'
 import './DevSecOpsInputPage.css'
 
 const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
   const [formData, setFormData] = useState({
-    iamAccessKey: '',
-    iamSecretKey: '',
-    ec2Id: '',
-    gitlabToken: ''
+    access_key: '',
+    secret_key: '',
+    instance_id: '',
+    gitlab_token: ''
   })
   
   const [showSecrets, setShowSecrets] = useState({
-    iamSecretKey: false,
-    gitlabToken: false
+    secret_key: false,
+    gitlab_token: false
   })
   
   const [validationErrors, setValidationErrors] = useState({})
   const [isFormValid, setIsFormValid] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
   
   const containerRef = useRef(null)
   const floatingElementsRef = useRef([])
@@ -26,26 +29,24 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
   useEffect(() => {
     const errors = {}
     
-    // Only validate if user has entered something and it's invalid
-    if (formData.iamAccessKey && formData.iamAccessKey.trim() !== '' && !formData.iamAccessKey.match(/^AKIA[0-9A-Z]{16}$/)) {
-      errors.iamAccessKey = 'Invalid AWS Access Key format (should start with AKIA)'
+    if (formData.access_key && formData.access_key.trim() !== '' && !formData.access_key.match(/^AKIA[0-9A-Z]{16}$/)) {
+      errors.access_key = 'Invalid AWS Access Key format (should start with AKIA)'
     }
     
-    if (formData.iamSecretKey && formData.iamSecretKey.trim() !== '' && formData.iamSecretKey.length < 10) {
-      errors.iamSecretKey = 'Secret key should be at least 10 characters'
+    if (formData.secret_key && formData.secret_key.trim() !== '' && formData.secret_key.length < 10) {
+      errors.secret_key = 'Secret key should be at least 10 characters'
     }
     
-    if (formData.ec2Id && formData.ec2Id.trim() !== '' && !formData.ec2Id.match(/^i-[0-9a-f]{8,17}$/)) {
-      errors.ec2Id = 'Invalid EC2 Instance ID format (should start with i-)'
+    if (formData.instance_id && formData.instance_id.trim() !== '' && !formData.instance_id.match(/^i-[0-9a-f]{8,17}$/)) {
+      errors.instance_id = 'Invalid EC2 Instance ID format (should start with i-)'
     }
     
-    if (formData.gitlabToken && formData.gitlabToken.trim() !== '' && formData.gitlabToken.length < 5) {
-      errors.gitlabToken = 'Token should be at least 5 characters'
+    if (formData.gitlab_token && formData.gitlab_token.trim() !== '' && formData.gitlab_token.length < 5) {
+      errors.gitlab_token = 'Token should be at least 5 characters'
     }
     
     setValidationErrors(errors)
     
-    // Allow form submission even with empty fields for demo purposes
     const hasAnyInput = Object.values(formData).some(value => value.trim() !== '')
     const noErrors = Object.keys(errors).length === 0
     setIsFormValid(hasAnyInput && noErrors)
@@ -93,16 +94,40 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
     }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (isFormValid) {
-      onStartAnalysis(formData)
+    if (!isFormValid) return
+
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      // Initialize session
+      await axios.post("http://localhost:5001/session", formData)
+      
+      // Get projects list
+      const res = await axios.post("http://localhost:5001/projects", {
+        access_key: formData.access_key
+      })
+      
+      console.log('Projects response:', res.data); // 디버깅을 위한 로그
+      
+      // Store access key in localStorage for future use
+      localStorage.setItem('access_key', formData.access_key)
+      
+      // Call the parent component's callback with the projects data
+      onStartAnalysis(res.data)
+    } catch (err) {
+      console.error('Error:', err); // 디버깅을 위한 로그
+      setError("세션 초기화 실패: " + (err.response?.data?.error || err.message))
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const formFields = [
     {
-      key: 'iamAccessKey',
+      key: 'access_key',
       label: 'IAM Access Key',
       placeholder: 'AKIA...', 
       icon: Key,
@@ -110,7 +135,7 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
       description: 'Your AWS IAM Access Key ID'
     },
     {
-      key: 'iamSecretKey',
+      key: 'secret_key',
       label: 'IAM Secret Key',
       placeholder: 'Enter your secret key...',
       icon: Shield,
@@ -118,7 +143,7 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
       description: 'Your AWS IAM Secret Access Key'
     },
     {
-      key: 'ec2Id',
+      key: 'instance_id',
       label: 'EC2 Instance ID',
       placeholder: 'i-1234567890abcdef0',
       icon: Server,
@@ -126,7 +151,7 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
       description: 'Target EC2 instance for security analysis'
     },
     {
-      key: 'gitlabToken',
+      key: 'gitlab_token',
       label: 'GitLab Token',
       placeholder: 'Enter your GitLab token...',
       icon: GitBranch,
@@ -195,6 +220,13 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
         </div>
       </header>
 
+      {error && (
+        <div className="error-banner">
+          <AlertCircle size={20} />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="input-page-content">
         <div className="form-container">
@@ -248,8 +280,7 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
                     
                     {hasError && (
                       <div className="error-message">
-                        <AlertCircle size={14} />
-                        {hasError}
+                        {validationErrors[field.key]}
                       </div>
                     )}
                   </div>
@@ -258,18 +289,12 @@ const DevSecOpsInputPage = ({ onBackToSelection, onStartAnalysis }) => {
             </div>
 
             <div className="form-actions">
-              <div className="security-notice">
-                <Shield size={16} />
-                <span>All credentials are encrypted and processed securely</span>
-              </div>
-              
               <button
                 type="submit"
-                className={`submit-btn ${isFormValid ? 'ready' : 'disabled'}`}
-                disabled={!isFormValid}
+                className="submit-btn"
+                disabled={!isFormValid || isSubmitting}
               >
-                <span>Start Security Analysis</span>
-                <Zap size={20} />
+                {isSubmitting ? 'Initializing...' : 'Start Analysis'}
               </button>
             </div>
           </form>
